@@ -1,7 +1,6 @@
-import { JobsOptions } from 'bullmq'
-
-export type bullmqAddMessage = {
-  name: string
-  data: any
-  opts?: JobsOptions
+export type payloadRecebidoBull = {
+  method: string
+  url: string
+  data?: any
+  token?: string
 }

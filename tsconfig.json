@@ -19,13 +19,9 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@queue_infra/*": ["queue/src/infrastructure/*"],
-      "@queue_domain/*": ["queue/src/infrastructure/*"],
-      "@queue_app/*": ["queue/src/infrastructure/*"]
-
-      // "@infra/*": ["./src/infrastructure/*"],
-      // "@domain/*": ["./src/domain/*"],
-      // "@app/*": ["./src/application/*"]
+      "@infra/*": ["./src/infrastructure/*"],
+      "@domain/*": ["./src/domain/*"],
+      "@app/*": ["./src/application/*"]
     }
   }
 }
