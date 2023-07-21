@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "module": "Node16",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2022",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@queue_infra/*": ["queue/src/infrastructure/*"],
+      "@queue_domain/*": ["queue/src/infrastructure/*"],
+      "@queue_app/*": ["queue/src/infrastructure/*"]
+
+      // "@infra/*": ["./src/infrastructure/*"],
+      // "@domain/*": ["./src/domain/*"],
+      // "@app/*": ["./src/application/*"]
+    }
+  }
+}
