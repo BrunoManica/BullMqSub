@@ -1,13 +1,17 @@
-import { Job, Queue } from 'bullmq'
+import { Job, Worker } from 'bullmq'
 import config from 'src/application/config/config'
-import { bullmqAddMessage } from 'src/domain/models/bullmq-types'
 import { IBullmqRepository } from 'src/domain/models/contracts/bullmq.repository'
 
 export class BullmqAdapter implements IBullmqRepository {
-  private queue
+  private worker: Worker
 
-  criarQueue(nomeQueue: string) {
-    this.queue = new Queue(nomeQueue, {
+  criarWorker(nomeQueue: string) {
+    this.worker = new Worker(nomeQueue, null, {
+      autorun: true,
+      // maxStalledCount: 2, // controla a qte de vezes que o dado pode ser re enviado antes de ser considerado com uma falha
+      // removeOnComplete: {
+      //   count: 100, // quantidade maxima de jobs ativos
+      // },
       connection: {
         host: config.REDIS_URL,
         port: config.REDIS_PORT,
@@ -15,15 +19,14 @@ export class BullmqAdapter implements IBullmqRepository {
     })
   }
 
-  adicionarMsgQueue(mensagem: bullmqAddMessage): Promise<Job<any, any, string>> {
-    return this.queue.add(mensagem.name, mensagem.data, mensagem.opts)
+  async consumirJob(token: string): Promise<Job<any, any, string>> {
+    return this.worker.getNextJob(token)
   }
 
-  adicionarLoteMsgQueue(mensagem: bullmqAddMessage) {
-    return this.queue.addBulk([
-      { name: 'name', data: { paint: 'car' } },
-      { name: 'name', data: { paint: 'house' } },
-      { name: 'name', data: { paint: 'boat' } },
-    ])
+  /*adicionarMsgQueue(mensagem: bullmqAddMessage): Promise<Job<any, any, string>> {
+    this.worker.disconnect()
+    this.worker.processJob()
+    return this.worker.add(mensagem.name, mensagem.data, mensagem.opts)
   }
+  */
 }
