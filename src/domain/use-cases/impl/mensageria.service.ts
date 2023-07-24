@@ -6,7 +6,6 @@ import { BULLMQ_REPOSITORY, IBullmqRepository } from '../../models/contracts/bul
 import { payloadRecebidoBull } from '../../models/bullmq-types'
 import config from '@app/config/config'
 import { Job } from 'bullmq'
-import { API_FSJ_REPOSITORY, IApiFsjRepository } from '@domain/models/contracts/api-fsj.repository'
 import { IRequisicoesService, REQUISICOES_SERVICE } from '../requisicoes.service.interface'
 
 @Injectable()
@@ -24,33 +23,37 @@ export class MensageriaService implements IMensageriaService {
       await this.iBullmqRepository.criarWorker(config.BULLMQ_QUEUE)
       this.consumirMensagem('promocao1')
     } catch (error) {
-      console.log(error)
+      this.logger.warn('[MensageriaService.consumirMensagem] Deu ruim, mensagem veio sem data')
+      await this.iBullmqRepository.finalizar()
+      process.exit(1)
     }
   }
   // gerar um uuid aleatorio
   async consumirMensagem(uuiMensagem: string) {
     this.logger.debug('[MensageriaService.consumirMensagem] Iniciando Consumo de mensagem')
-    const jobAux = await this.iBullmqRepository.consumirJob(uuiMensagem)
-    const job = jobAux as Job
+    const jobMensagem = (await this.iBullmqRepository.consumirJob(uuiMensagem)) as Job
 
-    if (!job?.data) {
-      this.logger.warn('[MensageriaService.consumirMensagem] Deu ruim, mensagem veio sem data')
-      console.log('deu ruim pq ?', job)
-      throw new Error('Deu ruim')
-      //this.consumirMensagem('promocao')
-    }
+    if (jobMensagem) {
+      await jobMensagem.extendLock(uuiMensagem, 30000)
+      if (!jobMensagem?.data) {
+        this.logger.warn('[MensageriaService.consumirMensagem] Deu ruim, mensagem veio sem data')
+        throw new Error('Deu ruim, mensagem veio sem data')
+      }
 
-    this.logger.debug('[MensageriaService.gerarMessagem] iniciando envio de mensagem para seu devido destinatario')
+      this.logger.debug('[MensageriaService.gerarMessagem] iniciando envio de mensagem para seu devido destinatario')
 
-    const sucesso = await this.enviarMensagem(job.data)
+      const sucesso = await this.enviarMensagem(jobMensagem.data)
 
-    if (sucesso) {
-      await job.moveToCompleted('deu bom', uuiMensagem, true)
+      if (sucesso) {
+        await jobMensagem.moveToCompleted('Sucesso ao consumir a mensagem', uuiMensagem, false)
+      } else {
+        await jobMensagem.moveToFailed(new Error('deu muito ruim, mas vamos tratar'), uuiMensagem, false)
+      }
+      this.logger.debug('[MensageriaService.gerarMessagem] mensagem enviada, requisitando a proxima')
     } else {
-      await job.moveToFailed(new Error('deu muito ruim, mas vamos tratar'), uuiMensagem, true)
+      this.logger.debug('[MensageriaService.consumirMensagem] Sem mensagens na fila')
     }
 
-    this.logger.debug('[MensageriaService.gerarMessagem] mensagem enviada, requisitando a proxima')
     await this.consumirMensagem('promocao')
   }
 
@@ -58,5 +61,3 @@ export class MensageriaService implements IMensageriaService {
     return this.iRequisicoesService.enviarRequisicao(mensagem)
   }
 }
-
-/// pesquisar sobre o lock creio que n esta consumindo direito  as msgs
