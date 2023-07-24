@@ -16,7 +16,7 @@ export class RequisicoesService implements IRequisicoesService {
     try {
       const mensagemMapeada = this.mapearRequisicaoGenerica(mensagem)
 
-      const retorno = await this.efetuarRequisicaoGenerica(mensagemMapeada)
+      await this.efetuarRequisicaoGenerica(mensagemMapeada)
       return Promise.resolve(true)
     } catch (error) {
       return Promise.resolve(false)
