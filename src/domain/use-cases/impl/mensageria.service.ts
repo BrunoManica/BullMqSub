@@ -21,7 +21,6 @@ export class MensageriaService implements IMensageriaService {
   async criarWorker() {
     try {
       await this.iBullmqRepository.criarWorker(config.BULLMQ_QUEUE)
-      this.consumirMensagem('promocao1')
     } catch (error) {
       this.logger.warn('[MensageriaService.consumirMensagem] Deu ruim, mensagem veio sem data')
       await this.iBullmqRepository.finalizar()
@@ -29,7 +28,8 @@ export class MensageriaService implements IMensageriaService {
     }
   }
   // gerar um uuid aleatorio
-  async consumirMensagem(uuiMensagem: string) {
+  async consumirMensagem() {
+    const uuiMensagem = '' //date time .now moment js com timezone
     this.logger.debug('[MensageriaService.consumirMensagem] Iniciando Consumo de mensagem')
     const jobMensagem = (await this.iBullmqRepository.consumirJob(uuiMensagem)) as Job
 
@@ -54,7 +54,7 @@ export class MensageriaService implements IMensageriaService {
       this.logger.debug('[MensageriaService.consumirMensagem] Sem mensagens na fila')
     }
 
-    await this.consumirMensagem('promocao')
+    await this.consumirMensagem()
   }
 
   enviarMensagem(mensagem: payloadRecebidoBull) {

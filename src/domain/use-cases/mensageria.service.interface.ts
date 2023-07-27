@@ -1,5 +1,5 @@
 export const MENSAGERIA_SERVICE = 'MENSAGERIA_SERVICE'
 
 export interface IMensageriaService {
-  consumirMensagem(uuiMensagem: string)
+  consumirMensagem(uuiMensagem: string): Promise<void>
 }

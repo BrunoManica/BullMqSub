@@ -47,11 +47,4 @@ export class BullmqAdapter implements IBullmqRepository {
   async consumirJob(token: string): Promise<Job<any, any, string>> {
     return this.worker.getNextJob(token)
   }
-
-  /*adicionarMsgQueue(mensagem: bullmqAddMessage): Promise<Job<any, any, string>> {
-    this.worker.disconnect()
-    this.worker.processJob()
-    return this.worker.add(mensagem.name, mensagem.data, mensagem.opts)
-  }
-  */
 }
